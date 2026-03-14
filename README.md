@@ -122,9 +122,9 @@ The ESLint configuration makes some assumptions about project structure:
 - Test code lives in a `**/tests` directory OR has a `*.spec.ts(x)` or a
   `*.test.ts(x)` filename. Tests can use devDependencies, unlike other code.
 - Config files all have `*.config.mjs` filenames (vite, vitest, playwright,
-  and eslint all follow this convention) and can import devDependencies,
-  unlike other code. (Note that this means we're not using TypeScript to check
-  our config files.)
+  and eslint all can follow this convention). These can also import
+  devDependencies, unlike other code. This means we're not using TypeScript to
+  check our config files.
 - Most everything should be registered as `error`. Warnings don't fail CI
   checks. Exceptions should have a documented reason. Notable exceptions:
   - `no-console` is `warn` because no-console regularly gets turned off by
@@ -134,6 +134,11 @@ The ESLint configuration makes some assumptions about project structure:
     visual inspection
   - `prettier` is `warn` because red squigglies for `prettier` are especially
     distracting and we can check for prettier failures in CI separately
+  - We do not override the default setting of `warn` for
+    `react-hooks/exhaustive-deps` in the default configuration. This rule
+    makes the (horrible) suggestion to remove the dependency array, and people
+    breaking their projects by blindly following that suggestion would be a
+    bad outcome.
 
 ### TypeScript
 
@@ -146,7 +151,8 @@ enables:
   heartbreak
 - `noFallthroughCasesInSwitch` and `noImplicitReturns`, which are linter-like
   properties that don't seem to be supported by typed linting in ESLint
-- `noUncheckedSideEffectImports`, which avoids an unexpected behavior
+- `noUncheckedSideEffectImports`, which can short-circuit unexpected failures
+  due to `.css` files (or similar) not being checked in
 
 ### Prettier
 
@@ -178,9 +184,8 @@ https://github.com/neu-se/spring-26-express
 | |-> Clock server (support code for react lectures):
 |     https://github.com/neu-se/spring-26-websocket-clock
 |
-v add a Vite frontend for a simple client/server setup
+v add a Vite frontend (+ Playwright tests) for a simple client/server setup
 https://github.com/neu-se/spring-26-vite
-|
 |
 v add React to the frontend
 https://github.com/neu-se/spring-26-fullstack
@@ -188,6 +193,6 @@ https://github.com/neu-se/spring-26-fullstack
 | |-> Remove backend for a React frontend-only project
 |     https://github.com/neu-se/spring-26-react
 |
-v use NPM workspaces to facilitate type and validator sharing
+v use NPM workspaces to facilitate sharing of validators between client/server
 https://github.com/neu-se/spring-26-workspaces
 ```
