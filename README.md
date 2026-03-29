@@ -140,4 +140,7 @@ https://github.com/neu-se/spring-26-fullstack
 |
 v use NPM workspaces to facilitate sharing of validators between client/server
 https://github.com/neu-se/spring-26-workspaces
+|
+v Project starter code (private)
+https://github.com/neu-se/spring-26-gamenite
 ```
