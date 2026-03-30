@@ -119,7 +119,7 @@ This base project has an opinionated ESLint configuration that relies on
 The ESLint configuration makes some assumptions about project structure:
 
 - Frontend code is code that lives in `./frontend` or `./client`, and uses
-  React and JSX. (This code is subject to different linter rules.)
+  React and JSX. This code is subject to different linter rules.
 - Test code lives in a `**/tests` directory OR has a `*.spec.ts(x)` or a
   `*.test.ts(x)` filename. Tests can use devDependencies, unlike other code.
 - Config files all have `*.config.mjs` filenames (vite, vitest, playwright,
@@ -132,9 +132,9 @@ The ESLint configuration makes some assumptions about project structure:
     line or file specific rules: we want to discourage excessive `no-console`
     use but it is more like the admonition to not check in commented-out code:
     it's mostly a problem when done excessively and it's easy to check in
-    visual inspection
+    visual inspection.
   - `prettier` is `warn` because red squigglies for `prettier` are especially
-    distracting and we can check for prettier failures in CI separately
+    distracting and we can check for prettier failures in CI separately.
   - We do not override the default setting of `warn` for
     `react-hooks/exhaustive-deps` in the default configuration. This rule
     makes the (horrible) suggestion to remove the dependency array, and people
@@ -145,15 +145,9 @@ The ESLint configuration makes some assumptions about project structure:
 
 TypeScript is configured with options that support
 [type stripping](https://nodejs.org/api/typescript.html#type-stripping).
-Beyond this, on top of regular strict settings, the TypeScript configuration
-enables:
-
-- `forceConsistentCasingInFileNames`, to avoid osx/linux compatibility
-  heartbreak
-- `noFallthroughCasesInSwitch` and `noImplicitReturns`, which are linter-like
-  properties that don't seem to be supported by typed linting in ESLint
-- `noUncheckedSideEffectImports`, which can short-circuit unexpected failures
-  due to `.css` files (or similar) not being checked in
+Beyond this, the TypeScript configuration enables `noFallthroughCasesInSwitch`
+and `noImplicitReturns`, which are linter-like properties that don't seem to
+well-supported by typed linting in ESLint.
 
 ### Prettier
 
@@ -196,4 +190,7 @@ https://github.com/neu-se/spring-26-fullstack
 |
 v use NPM workspaces to facilitate sharing of validators between client/server
 https://github.com/neu-se/spring-26-workspaces
+|
+v Project starter code (private)
+https://github.com/neu-se/spring-26-gamenite
 ```

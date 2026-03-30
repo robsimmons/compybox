@@ -5,19 +5,16 @@
     "lib": ["ES2024"],
     "module": "node18",
     "skipLibCheck": true,
+    "noEmit": true,
 
     /* Support the use of type stripping in Node */
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
-    "noEmit": true,
     "verbatimModuleSyntax": true,
 
     /* Linting */
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "noUncheckedSideEffectImports": true
+    "noImplicitReturns": true
   },
   "include": ["./**/*.ts"],
   "exclude": ["./node_modules", "./client", "./frontend"]
