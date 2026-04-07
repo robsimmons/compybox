@@ -7,49 +7,7 @@
     <title>Transcript service</title>
   </head>
   <body>
-    <h1>Transcript service</h1>
-    <div>
-      <label for="password">Enter credentials:</label>
-      <br />
-      <input id="password" />
-    </div>
-    <section>
-      <h2>Add new student</h2>
-      <form id="addStudent">
-        <label for="studentName">Enter new student's name:</label>
-        <input id="studentName" />
-        <br />
-        <button>Create new student transcript</button>
-      </form>
-      <div class="feedback" id="showNewStudent"></div>
-    </section>
-    <section>
-      <h2>Add grade for existing student</h2>
-      <form id="addGrade">
-        <label for="studentIdForAddGrade">Student ID:</label>
-        <input id="studentIdForAddGrade" />
-        <br />
-        <label for="addGradeCourse">Course name:</label>
-        <input id="addGradeCourse" />
-        <br />
-        <label for="addGradeGrade">Course grade:</label>
-        <input id="addGradeGrade" />
-        <br />
-        <button>Add grade</button>
-      </form>
-      <div class="feedback" id="showAddGrade"></div>
-    </section>
-    <section>
-      <h2>View transcript</h2>
-      <form id="viewTranscript">
-        <label for="idToView">Enter student id to view:</label>
-        <input id="idToView" />
-        <br />
-        <button>View</button>
-      </form>
-      <div class="feedback" id="showTranscript"></div>
-    </section>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

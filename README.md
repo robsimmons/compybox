@@ -2,7 +2,7 @@
 
 This is a template project for CS4530, Software Engineering at Northeastern.
 
-## Vite+Express Full-stack Application
+## Vite+Express Full-stack React Application
 
 This project has two parts:
 

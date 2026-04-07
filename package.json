@@ -1,5 +1,5 @@
 {
-  "name": "cs4530-vite",
+  "name": "cs4530-fullstack",
   "version": "1.0.0",
   "description": "CS4530 Template",
   "type": "module",
@@ -25,7 +25,10 @@
   "devDependencies": {
     "@playwright/test": "^1.58.1",
     "@types/express": "^5.0.6",
+    "@types/react": "^19.2.9",
+    "@types/react-dom": "^19.2.3",
     "@types/supertest": "^7.2.0",
+    "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.0.18",
     "concurrently": "^9.2.1",
     "eslint": "^9.39.2",
@@ -46,6 +49,8 @@
   },
   "dependencies": {
     "express": "^5.2.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "zod": "^4.3.6"
   }
 }
