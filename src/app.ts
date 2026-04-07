@@ -1,70 +1,80 @@
 import express from "express";
-import { z } from "zod";
-import { checkPassword } from "./auth.service.ts";
-import { TranscriptDB } from "./transcript.service.ts";
-import type { Transcript } from "./types.ts";
+import { addWorkToQueue, emitStatusNow, emitter, isJob, type EventPayload } from "./dispatch.ts";
+import { zRegisterRequest } from "./types.ts";
 
 export const app = express();
 app.use(express.json());
-const db = new TranscriptDB();
 
-/* Handle API requests to create a new student record */
-const zAddStudentBody = z.object({
-  password: z.string(),
-  studentName: z.string(),
-});
-app.post("/api/addStudent", (req, res) => {
-  const body = zAddStudentBody.safeParse(req.body);
-  if (!body.success) {
-    res.status(400).send({ error: "Poorly-formed request" });
-  } else if (!checkPassword(body.data.password)) {
-    res.status(403).send({ error: "Invalid credentials" });
-  } else {
-    const id = db.addStudent(body.data.studentName);
-    res.send({ studentID: id });
-  }
+app.post("/compybox/api/register", (req, res) => {
+  const body = zRegisterRequest.parse(req.body);
+  const id = addWorkToQueue(body);
+  res.send("compybox/api/track/" + id);
 });
 
-/* Handle API requests to add a grade to a student */
-const zAddGradeBody = z.object({
-  password: z.string(),
-  studentID: z.int().gte(0),
-  courseName: z.string(),
-  courseGrade: z.number().gte(0).lte(100),
-});
-app.post("/api/addGrade", (req, res) => {
-  try {
-    const body = zAddGradeBody.parse(req.body);
-    if (!checkPassword(body.password)) {
-      res.status(403).send({ error: "Invalid credentials" });
-    } else {
-      db.addGrade(body.studentID, body.courseName, body.courseGrade);
-      res.send({ success: true });
+app.post("/compybox/api/sync", (req, res) => {
+  const body = zRegisterRequest.parse(req.body);
+  const id = addWorkToQueue(body);
+  const handleUpdate = (...payload: EventPayload) => {
+    if (payload[0] === "done") {
+      res.send(payload[1]);
     }
-  } catch (e) {
-    res.status(400).send({ error: "Poorly-formed request" });
-  }
+  };
+
+  req.on("close", () => {
+    emitter.off(id, handleUpdate);
+  });
+  emitter.on(id, handleUpdate);
 });
 
-/* Handle API requests to retrieve a student transcript */
-const zGetTranscriptBody = z.object({
-  password: z.string(),
-  studentID: z.int().gte(0),
-});
-app.post("/api/getTranscript", (req, res) => {
-  const body = zGetTranscriptBody.safeParse(req.body);
-  if (!body.success) {
-    res.status(400).send({ error: "Poorly-formed request" });
-  } else if (!checkPassword(body.data.password)) {
-    res.status(403).send({ error: "Invalid credentials" });
-  } else {
-    let response: { success: true; transcript: Transcript } | { success: false };
-    try {
-      const transcript = db.getTranscript(body.data.studentID);
-      response = { success: true, transcript };
-    } catch {
-      response = { success: false };
-    }
-    res.send(response);
+app.get("/compybox/api/track/:id", (req, res) => {
+  const id = req.params.id;
+  if (!isJob(id)) {
+    res.status(400).send(`the server did not recognize the id ${id}`);
   }
+
+  // Server-sent events always need these
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Connection", "keep-alive");
+  // For nginx
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders();
+
+  const sendMsg = (msg: string) => {
+    res.write(`data: ${msg}\n\n`);
+  };
+
+  let keepAlive = setInterval(() => {
+    res.write(":\n");
+  }, 5000);
+
+  const handleUpdate = (...payload: EventPayload) => {
+    switch (payload[0]) {
+      case "done":
+        clearInterval(keepAlive);
+        keepAlive = null;
+        sendMsg("done " + JSON.stringify(payload[1]));
+        res.end();
+        break;
+      case "error":
+        clearInterval(keepAlive);
+        keepAlive = null;
+        sendMsg("error " + JSON.stringify(payload[1]));
+        res.end();
+        break;
+      case "running":
+        sendMsg("running " + id);
+        break;
+      case "stats":
+        sendMsg("stats " + JSON.stringify({ waiting: payload[1], place: payload[2] }));
+        break;
+    }
+  };
+
+  req.on("close", () => {
+    clearInterval(keepAlive);
+    emitter.off(id, handleUpdate);
+  });
+  emitter.on(id, handleUpdate);
+  emitStatusNow(id);
 });

@@ -1,8 +1,22 @@
-// types.ts - types for the transcript service
+import { z } from "zod";
 
-export type Course = string;
-export type StudentID = number;
-export type StudentName = string;
-export type Student = { studentID: StudentID; studentName: StudentName };
-export type CourseGrade = { course: Course; grade: number };
-export type Transcript = { student: Student; grades: CourseGrade[] };
+export const zRegisterRequest = z.union([
+  z.object({
+    type: z.literal("simple"),
+    project: z.string(),
+    code: z.string(),
+  }),
+  z.object({
+    type: z.literal("comparator"),
+    project: z.string(),
+    challenge: z.string(),
+    solution: z.string(),
+  }),
+]);
+export type RegisterRequest = z.infer<typeof zRegisterRequest>;
+
+export type VerificationResponse =
+  | { type: "failure"; text: string }
+  | { type: "sorry" }
+  | { type: "partial"; axioms: string[]; signature: string[] }
+  | { type: "full"; signature: string[] };

@@ -79,7 +79,7 @@ export default defineConfig([
           selector: "variable",
           modifiers: ["global", "const"],
           types: ["boolean", "number", "string", "array"],
-          format: ["UPPER_CASE"],
+          format: ["UPPER_CASE", "camelCase"],
         },
         {
           // Private methods and fields must have a leading underscore: this._count
