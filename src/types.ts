@@ -17,6 +17,7 @@ export type RegisterRequest = z.infer<typeof zRegisterRequest>;
 
 export type VerificationResponse =
   | { type: "failure"; text: string }
-  | { type: "sorry" }
+  | { type: "sorry"; where: string }
+  | { type: "empty" }
   | { type: "partial"; axioms: string[]; signature: string[] }
   | { type: "full"; signature: string[] };
