@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Comparator in Live App Demo",
   "type": "module",
+  "files": [
+    "dist",
+    "frontend/dist"
+  ],
   "scripts": {
     "check": "npm-run-all check:*",
     "check:frontend": "tsc -p frontend/tsconfig.json",
