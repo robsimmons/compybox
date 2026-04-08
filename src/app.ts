@@ -14,16 +14,13 @@ app.post("/compybox/api/register", (req, res) => {
 app.post("/compybox/api/sync", (req, res) => {
   const body = zRegisterRequest.parse(req.body);
   const id = addWorkToQueue(body);
-  console.log("Hi");
   const handleUpdate = (...payload: EventPayload) => {
-    console.log("payload", ...payload);
     if (payload[0] === "done") {
       res.send(payload[1]);
     }
   };
 
   res.on("close", () => {
-    console.log("closing " + id);
     emitter.off(id, handleUpdate);
   });
   emitter.on(id, handleUpdate);

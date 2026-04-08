@@ -55,7 +55,6 @@ export function emitStatusNow(id: string) {
 }
 
 setInterval(() => {
-  console.log({ waitingJobCount, totalJobCount, runningJobCount });
   [...Q].map(emitStatusNow);
 }, 3000);
 

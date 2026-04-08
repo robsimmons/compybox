@@ -2,7 +2,17 @@ import { useState, type JSX } from "react";
 import { type EditorState } from "./types.ts";
 import SimpleEditor from "./SimpleEditor.tsx";
 import ComparatorEditor from "./ComparatorEditor.tsx";
-import { createListCollection, Link, Portal, Select, Tabs, Text } from "@chakra-ui/react";
+import {
+  createListCollection,
+  Em,
+  Link,
+  Portal,
+  Select,
+  Splitter,
+  Stack,
+  Tabs,
+  Text,
+} from "@chakra-ui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheckDouble,
@@ -53,17 +63,18 @@ export default function App() {
       break;
   }
 
+  const [bPerc, setBPerc] = useState(50);
+
   return (
     <>
       <div
         style={{
           display: "grid",
           gridTemplateRows: "auto auto 1fr",
-          gridTemplateColumns: "1fr 1fr",
           height: "100vh",
         }}
       >
-        <Text style={{ gridColumn: "1/span 2", marginBottom: 2 }}>
+        <Text style={{ marginBottom: 2 }}>
           This is a prototype for adding verification functionality to the Live Lean app. You can
           pick specific inputs from the drop-down below. See{" "}
           <Link href={designDocLink} target="_blank">
@@ -75,7 +86,7 @@ export default function App() {
           collection={options}
           value={value}
           onValueChange={(e) => setValue(e.value)}
-          style={{ gridColumn: "1 / span 2", marginBottom: "1rem" }}
+          style={{ marginBottom: "1rem" }}
         >
           <Select.Label hidden={true}>Choose example</Select.Label>
           <Select.Control>
@@ -99,36 +110,52 @@ export default function App() {
             </Select.Positioner>
           </Portal>
         </Select.Root>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateRows: "1fr",
+        <Splitter.Root
+          panels={[{ id: "a" }, { id: "b" }]}
+          onResize={(e) => {
+            setBPerc(e.size[1]);
           }}
         >
-          {state.type === "simple" ? (
-            <SimpleEditor code={state.code} />
-          ) : (
-            <ComparatorEditor
-              challenge={state.challenge}
-              solution={state.solution}
-              hash={state.hash}
-              friendlyHash={state.friendlyHash}
-            />
-          )}
-        </div>
-        <Tabs.Root defaultValue="infoview">
-          <Tabs.List>
-            <Tabs.Trigger value="infoview">InfoView</Tabs.Trigger>
-            <Tabs.Trigger value="verify">Verification {icon}</Tabs.Trigger>
-            <Tabs.Indicator />
-          </Tabs.List>
-          <Tabs.Content value="infoview" style={{ padding: "1em" }}>
-            This demo doesn't actually have an infoview!
-          </Tabs.Content>
-          <Tabs.Content value="verify">
-            <VerifyTab state={state} setStatus={setStatus} />
-          </Tabs.Content>
-        </Tabs.Root>{" "}
+          <Splitter.Panel id="a" display="grid">
+            {state.type === "simple" ? (
+              <SimpleEditor code={state.code} />
+            ) : (
+              <ComparatorEditor
+                challenge={state.challenge}
+                solution={state.solution}
+                hash={state.hash}
+                friendlyHash={state.friendlyHash}
+              />
+            )}
+          </Splitter.Panel>
+          <Splitter.ResizeTrigger id="a:b" />{" "}
+          <Splitter.Panel id="b" display="grid">
+            <Tabs.Root defaultValue="infoview">
+              <Tabs.List>
+                <Tabs.Trigger value="infoview">InfoView</Tabs.Trigger>
+                <Tabs.Trigger value="verify">Verification {icon}</Tabs.Trigger>
+                <Tabs.Indicator />
+              </Tabs.List>
+              <Tabs.Content value="infoview">
+                <Stack style={{ paddingInline: "var(--chakra-spacing-3)" }}>
+                  <Text>This demo doesn't actually have an infoview!</Text>
+                  <Text>
+                    This is here in the demo to illustrate that most of the time, the verification
+                    signal will just come from the icon on the "Verification" tab, but that people
+                    can click on the verification tab for more info.
+                  </Text>
+                  <Text>
+                    In normal usage, people are <Em>mostly</Em> gonna be here, looking at this here
+                    infoview.
+                  </Text>
+                </Stack>
+              </Tabs.Content>
+              <Tabs.Content value="verify">
+                <VerifyTab vw={bPerc} state={state} setStatus={setStatus} />
+              </Tabs.Content>
+            </Tabs.Root>
+          </Splitter.Panel>
+        </Splitter.Root>
       </div>
     </>
   );

@@ -6,6 +6,7 @@ import PreScroll from "./PreScroll";
 
 interface VerifyTabProps {
   state: EditorState;
+  vw: number;
   setStatus: (status: "waiting" | "checked" | "warning" | "error") => void;
 }
 
@@ -23,7 +24,7 @@ const zJobStatus = z.union([
 
 const boxStyle = { paddingInline: "var(--chakra-spacing-3)" };
 
-export default function VerifyTab({ state, setStatus: setExternalStatus }: VerifyTabProps) {
+export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: VerifyTabProps) {
   const [jobStatus, setJobStatus] = useState<null | z.infer<typeof zJobStatus>>(null);
   const [storedEditorState, setStoredEditorState] = useState(state);
 
@@ -95,7 +96,7 @@ export default function VerifyTab({ state, setStatus: setExternalStatus }: Verif
             The current Lean file failed verification; its contents should not treated as reliable.
             The Nanoda kernel gave the following error messages:
           </Text>
-          <PreScroll messages={[jobStatus.text]} />
+          <PreScroll vw={vw} messages={[jobStatus.text]} />
         </Stack>
       );
     case "empty":
@@ -136,8 +137,8 @@ export default function VerifyTab({ state, setStatus: setExternalStatus }: Verif
             <Text>
               The Lean kernel has verified that the contents of the Candidate Solution represent a
               valid solution to the problem posed in the challenge file (SHA256 hash{" "}
-              <Code style={{ fontFamily: "monospace" }}>{state.hash}</Code>, friendly hash{" "}
-              <Em>{state.friendlyHash}</Em>).
+              <Code style={{ fontFamily: "monospace" }}>{state.hash}</Code>, friendly name{" "}
+              <Em>{state.cHash}</Em>).
             </Text>
           </Stack>
         );
@@ -155,7 +156,7 @@ export default function VerifyTab({ state, setStatus: setExternalStatus }: Verif
               </Link>
               :
             </Text>
-            <PreScroll messages={jobStatus.signature} />
+            <PreScroll vw={vw} messages={jobStatus.signature} />
             <Text>
               To fully validate the proof, you need to convince yourself that the statements above
               correspond to the statements in your file. Alternatively, you can use{" "}
@@ -192,7 +193,7 @@ export default function VerifyTab({ state, setStatus: setExternalStatus }: Verif
           <Text>
             Specifically, it uses {jobStatus.axioms.length > 1 ? "these axioms" : "this axiom"}:
           </Text>
-          <PreScroll messages={jobStatus.axioms} />
+          <PreScroll vw={vw} messages={jobStatus.axioms} />
           {state.type === "simple" && (
             <>
               <Text>
@@ -200,7 +201,7 @@ export default function VerifyTab({ state, setStatus: setExternalStatus }: Verif
                 Lean's type theory, then you can trust the Lean kernel's verification of the
                 following contents for the file:
               </Text>
-              <PreScroll messages={jobStatus.signature} />
+              <PreScroll vw={vw} messages={jobStatus.signature} />
             </>
           )}
         </Stack>

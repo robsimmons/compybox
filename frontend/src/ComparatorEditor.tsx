@@ -25,7 +25,7 @@ export default function ComparatorEditor({
       >
         <pre>
           Challenge SHA-256 hash: {hash} {"\n"}
-          Friendly version of hash: {friendlyHash}
+          Friendly name of hash: {friendlyHash}
           {"\n\n"}
           {challenge}
         </pre>
@@ -40,25 +40,4 @@ export default function ComparatorEditor({
       </Tabs.Content>
     </Tabs.Root>
   );
-  /*
-    const [showChallenge, setShowChallenge] = useState(true);
-  
-  return (
-    <div>
-      <div>
-        <button onClick={() => setShowChallenge(true)}>Challenge ({friendlyHash})</button>
-        <button onClick={() => setShowChallenge(true)}>Candidate Solution</button>
-      </div>
-      <div style={showChallenge ? {} : { display: "none" }}>
-        <pre>
-          Challenge SHA-256 hash: {hash} {"\n"}
-          Friendly version of hash: {friendlyHash}
-          {"\n\n"}
-          {challenge}
-        </pre>
-      </div>
-      <textarea style={showChallenge ? { display: "none" } : {}} value={solution} />
-    </div>
-  );
-  */
 }

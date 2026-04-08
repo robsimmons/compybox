@@ -2,12 +2,13 @@ import { Box, ScrollArea, Stack } from "@chakra-ui/react";
 
 interface PreScrollProps {
   messages: string[];
+  vw: number;
 }
 
-export default function ({ messages }: PreScrollProps) {
+export default function ({ vw, messages }: PreScrollProps) {
   return (
     <Box borderRadius="var(--chakra-spacing-3)" border="1px solid var(--chakra-colors-border)">
-      <ScrollArea.Root width="calc(50vw - 2*var(--chakra-spacing-3))" size="xs">
+      <ScrollArea.Root width={`calc(${vw}vw - 2*var(--chakra-spacing-3))`} size="xs">
         <ScrollArea.Viewport
           css={{
             "--scroll-shadow-size": "4rem",
