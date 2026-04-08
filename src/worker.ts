@@ -51,7 +51,7 @@ export async function doWork(data: RegisterRequest): Promise<VerificationRespons
       return { type: "full", signature: ["theorem x : True := _"] };
     }
     if (challenge === "theoremex:True:=bysorry" && solution === "theoremex:True:=bysorry") {
-      return { type: "sorry" };
+      return { type: "sorry", where: "ex" };
     }
     if (challenge === "theoremex:True:=bysorry" && solution === "theoremex:True:=bynative_decide") {
       return {

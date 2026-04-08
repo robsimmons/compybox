@@ -30,6 +30,10 @@ export function isJob(id: string) {
 export function emitStatusNow(id: string) {
   console.log("Emitting status now for " + id);
   const job = jobDb.get(id);
+  if (!job) {
+    console.log("ERROR: no job for " + id);
+    return;
+  }
   switch (job.status.tag) {
     case "waiting":
       emitter.emit(
@@ -60,8 +64,8 @@ function drain() {
   // An `if` statement would be fine here; the `while` loop is defensive but
   // harmless.
   while (runningJobCount < CONCURRENCY && Q.length > 0) {
-    const id = Q.deq();
-    const job = jobDb.get(id);
+    const id = Q.deq()!;
+    const job = jobDb.get(id)!;
     // By invariant, job id is enqueued and is waiting
     if (job.status.tag !== "waiting") throw new Error("invariant, status was " + job.status.tag);
     const jobData = job.status.data;

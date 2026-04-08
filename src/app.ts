@@ -48,7 +48,7 @@ app.get("/compybox/api/track/:id", (req, res) => {
     res.write(`data: ${msg}\n\n`);
   };
 
-  let keepAlive = setInterval(() => {
+  let keepAlive: NodeJS.Timeout | undefined = setInterval(() => {
     res.write(":\n");
   }, 5000);
 
@@ -56,13 +56,13 @@ app.get("/compybox/api/track/:id", (req, res) => {
     switch (payload[0]) {
       case "done":
         clearInterval(keepAlive);
-        keepAlive = null;
+        keepAlive = undefined;
         sendMsg("done " + JSON.stringify(payload[1]));
         res.end();
         break;
       case "error":
         clearInterval(keepAlive);
-        keepAlive = null;
+        keepAlive = undefined;
         sendMsg("error " + JSON.stringify(payload[1]));
         res.end();
         break;

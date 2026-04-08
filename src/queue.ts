@@ -7,11 +7,11 @@ export class Queue<T> {
   deq(): T | null {
     if (this._front.length === 0) {
       while (this._back.length > 0) {
-        this._front.push(this._back.pop());
+        this._front.push(this._back.pop()!);
       }
     }
     if (this._front.length === 0) return null;
-    return this._front.pop();
+    return this._front.pop()!;
   }
   get length() {
     return this._back.length + this._front.length;
