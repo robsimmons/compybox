@@ -17,7 +17,7 @@
     "dev": "concurrently -n frontend,server -c blue,green \"npm run dev:frontend\" \"npm run dev:server\"",
     "dev:frontend": "vite frontend",
     "dev:server": "node --watch ./src/server.ts",
-    "build": "tsc && tsc -p frontend/tsconfig.json --noEmit && vite build frontend",
+    "build": "touch foo.txt && tsc && tsc -p frontend/tsconfig.json --noEmit && vite build frontend && ls -la && fail",
     "start": "MODE=production node ./src/server.ts",
     "playwright": "playwright test --ui"
   },
