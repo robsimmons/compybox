@@ -1,7 +1,7 @@
 {
-  "name": "cs4530-fullstack",
+  "name": "compybox",
   "version": "1.0.0",
-  "description": "CS4530 Template",
+  "description": "Comparator in Live App Demo",
   "type": "module",
   "scripts": {
     "check": "npm-run-all check:*",
