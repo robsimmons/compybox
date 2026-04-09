@@ -138,7 +138,7 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
               The Lean kernel has verified that the contents of the Candidate Solution represent a
               valid solution to the problem posed in the challenge file (SHA256 hash{" "}
               <Code style={{ fontFamily: "monospace" }}>{state.hash}</Code>, friendly name{" "}
-              <Em>{state.cHash}</Em>).
+              <Em>{state.friendlyHash}</Em>).
             </Text>
           </Stack>
         );
@@ -158,8 +158,8 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
             </Text>
             <PreScroll vw={vw} messages={jobStatus.signature} />
             <Text>
-              To fully validate the proof, you need to convince yourself that the statements above
-              correspond to the statements in your file. Alternatively, you can use{" "}
+              If you're concerned about whether these verified statements actually match the theorem
+              statements in your input file, you can use{" "}
               <Link
                 href="/"
                 onClick={(e) => {

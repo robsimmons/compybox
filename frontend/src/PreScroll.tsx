@@ -33,10 +33,10 @@ export default function ({ vw, messages }: PreScrollProps) {
                 <pre key={i}>{ax}</pre>
               ))}
             </Stack>
-          </ScrollArea.Content>{" "}
+          </ScrollArea.Content>
         </ScrollArea.Viewport>
         <ScrollArea.Scrollbar orientation="horizontal" />
-        <ScrollArea.Corner />{" "}
+        <ScrollArea.Corner />
       </ScrollArea.Root>
     </Box>
   );

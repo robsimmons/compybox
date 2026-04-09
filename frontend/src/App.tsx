@@ -1,12 +1,15 @@
-import { useState, type JSX } from "react";
+import { useEffect, useRef, useState, type JSX } from "react";
 import { type EditorState } from "./types.ts";
 import SimpleEditor from "./SimpleEditor.tsx";
 import ComparatorEditor from "./ComparatorEditor.tsx";
 import {
+  Box,
+  Checkbox,
   createListCollection,
   Em,
   Link,
   Portal,
+  ScrollArea,
   Select,
   Splitter,
   Stack,
@@ -63,7 +66,33 @@ export default function App() {
       break;
   }
 
+  const [currTab, setCurrTab] = useState<null | string>(null);
   const [bPerc, setBPerc] = useState(50);
+  const splitterPanelB = useRef<HTMLDivElement | null>(null);
+  const splitterTabs = useRef<HTMLDivElement | null>(null);
+  const splitterConfig = useRef<HTMLDivElement | null>(null);
+  const [scrollHMenu, setScrollHMenu] = useState(0);
+
+  useEffect(() => {
+    if (currTab !== "verify") return undefined;
+    const observer = new ResizeObserver(() => {
+      setScrollHMenu(
+        splitterPanelB.current!.offsetHeight -
+          splitterConfig.current!.offsetHeight -
+          splitterTabs.current!.offsetHeight,
+      );
+    });
+    setScrollHMenu(
+      splitterPanelB.current!.offsetHeight -
+        splitterConfig.current!.offsetHeight -
+        splitterTabs.current!.offsetHeight,
+    );
+    observer.observe(splitterPanelB.current!);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [currTab]);
 
   return (
     <>
@@ -129,14 +158,19 @@ export default function App() {
             )}
           </Splitter.Panel>
           <Splitter.ResizeTrigger id="a:b" />{" "}
-          <Splitter.Panel id="b" display="grid">
-            <Tabs.Root defaultValue="infoview">
-              <Tabs.List>
+          <Splitter.Panel id="b" ref={splitterPanelB}>
+            <Tabs.Root
+              defaultValue="infoview"
+              display="grid"
+              gridTemplateRows="auto 1fr"
+              onValueChange={(e) => setCurrTab(e.value)}
+            >
+              <Tabs.List ref={splitterTabs}>
                 <Tabs.Trigger value="infoview">InfoView</Tabs.Trigger>
                 <Tabs.Trigger value="verify">Verification {icon}</Tabs.Trigger>
                 <Tabs.Indicator />
               </Tabs.List>
-              <Tabs.Content value="infoview">
+              <Tabs.Content value="infoview" display="grid">
                 <Stack style={{ paddingInline: "var(--chakra-spacing-3)" }}>
                   <Text>This demo doesn't actually have an infoview!</Text>
                   <Text>
@@ -150,8 +184,62 @@ export default function App() {
                   </Text>
                 </Stack>
               </Tabs.Content>
-              <Tabs.Content value="verify">
-                <VerifyTab vw={bPerc} state={state} setStatus={setStatus} />
+              <Tabs.Content value="verify" display="grid" paddingTop="0">
+                <Stack
+                  backgroundColor="lightgray"
+                  direction="row"
+                  paddingInline="var(--chakra-spacing-3)"
+                  paddingBlock="var(--chakra-spacing-1)"
+                  ref={splitterConfig}
+                >
+                  <input
+                    type="checkbox"
+                    checked
+                    onChange={() =>
+                      alert(
+                        "In the final version this will be off by default but can be turned on. In this demo it's always on.",
+                      )
+                    }
+                  />
+
+                  <Text textStyle="xs">
+                    Use Nanoda (
+                    <Link
+                      href="/"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        alert(
+                          "This will go to a webpage explaining how verification works, the section that explains what independent kernels are, that Nanoda is one, and that this button additional invokes Nanoda checking",
+                        );
+                      }}
+                    >
+                      what?
+                    </Link>
+                    )
+                  </Text>
+                  <Text textStyle="xs" marginLeft="auto">
+                    <Link
+                      href="/"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        alert(
+                          "This is where we link to a general-audience explanation of what it means for Lean's kernel to check a mathematical development.",
+                        );
+                      }}
+                    >
+                      What is verification?
+                    </Link>
+                  </Text>
+                </Stack>
+                <ScrollArea.Root height={scrollHMenu}>
+                  <ScrollArea.Viewport>
+                    <ScrollArea.Content paddingBlock="var(--chakra-spacing-2)">
+                      <VerifyTab vw={bPerc} state={state} setStatus={setStatus} />
+                    </ScrollArea.Content>{" "}
+                  </ScrollArea.Viewport>
+                  <ScrollArea.Scrollbar orientation="vertical" />
+                  <ScrollArea.Corner />
+                </ScrollArea.Root>
               </Tabs.Content>
             </Tabs.Root>
           </Splitter.Panel>
