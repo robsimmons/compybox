@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { EditorState } from "./types";
 import { z } from "zod";
-import { Code, Em, Link, Stack, Text } from "@chakra-ui/react";
+import { Button, Code, Em, Link, Stack, Strong, Text } from "@chakra-ui/react";
 import PreScroll from "./PreScroll";
 
 interface VerifyTabProps {
@@ -93,8 +93,8 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
       return (
         <Stack style={boxStyle}>
           <Text>
-            The current Lean file failed verification; its contents should not treated as reliable.
-            The Nanoda kernel gave the following error messages:
+            The current Lean file could not be verified, and should not be treated as a reliable
+            proof of anything. The Nanoda kernel gave the following error messages:
           </Text>
           <PreScroll vw={vw} messages={[jobStatus.text]} />
         </Stack>
@@ -112,22 +112,35 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
       return (
         <Stack style={boxStyle}>
           <Text>
-            The current Lean file failed verification: <Code>{jobStatus.where}</Code> uses the{" "}
-            <Code>sorryAx</Code> axiom that can be used to prove anything.
+            The current Lean file <Strong>could not be verified</Strong>, and should not be treated
+            as a reliable proof of anything.
           </Text>
           <Text>
-            Would you like to{" "}
+            The reason the file cannot be verified is that <Code>{jobStatus.where}</Code> uses the{" "}
+            <Code>sorryAx</Code> axiom, and this axiom can be used to prove anything.
+          </Text>
+          <Text>
+            A Lean file that uses <Code>sorryAx</Code> can be turned into a Challenge for others to
+            prove (
             <Link
               href="/"
               onClick={(e) => {
                 e.preventDefault();
-                alert("This would create a new challenge, which would open in a new window/tab");
+                alert("This would be a link to a friendly explanation of the challenge workflow");
               }}
             >
-              generate a challenge from this code
+              learn more about this
             </Link>
-            ?
+            ).
           </Text>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              alert("This would create a new challenge, which would open in a new window/tab");
+            }}
+          >
+            Generate a challenge from this code
+          </Button>
         </Stack>
       );
     case "full":
@@ -180,7 +193,7 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
       return (
         <Stack style={boxStyle}>
           <Text>
-            The Lean kernel and the Nanoda kernel <strong>cannot</strong> fully verify this
+            The Lean kernel and the Nanoda kernel <Strong>cannot</Strong> fully verify this
             development, because it uses axioms aside from the{" "}
             <Link
               href="https://lean-lang.org/doc/reference/latest/Axioms/#standard-axioms"
