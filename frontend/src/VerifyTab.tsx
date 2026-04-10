@@ -129,7 +129,7 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
               default:
                 setExternalStatus("error");
             }
-            source.close();
+            source!.close();
           }
         };
       })
@@ -293,7 +293,7 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
             >
               standard three
             </Link>
-            .
+            .s
           </Text>
           <Text>
             Specifically, it uses {result.axioms.length > 1 ? "these axioms" : "this axiom"}:
