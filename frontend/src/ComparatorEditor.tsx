@@ -56,7 +56,7 @@ export default function ComparatorEditor({ vw, challenge, solution }: Comparator
                 <Em>
                   {hash.friendly.map((a, i) => (
                     <span key={i}>
-                      {i === 3 ? (
+                      {i < 3 ? (
                         <span
                           title={`The adjective "${a.word}" is derived from the ${nth[i]} byte in the SHA-256 hash ("${a.str}")`}
                         >

@@ -1,6 +1,8 @@
 import type { EditorState } from "./types";
 
-const exploit = `import Lean
+const exploit = `import Mathlib
+
+def pluss (a b : ℕ) : ℕ := a + b + (1 + 999 + 2)
 
 elab "theorem " id:ident ":" _ty:term ":=" _pf:term : command =>
   Lean.Elab.Command.runTermElabM fun _ =>
@@ -13,37 +15,77 @@ elab "theorem " id:ident ":" _ty:term ":=" _pf:term : command =>
       safety := .safe
     }
 
-theorem ex : False := bogus ai generated nonsense`;
+theorem pluss_comm : {a b : ℕ} → pluss a b = pluss b a := 
+  bogus ai generated nonsense`;
+
+const challenge = `import Mathlib
+
+def pluss (a b : ℕ) : ℕ := a + b + (1 + 999 + 2)
+
+theorem pluss_comm {a b} : pluss a b = pluss b a := by
+  sorry`;
+
+const basicSol = `import Mathlib
+
+def pluss (a b : ℕ) : ℕ := a + b + (1 + 999 + 2)
+
+theorem pluss_comm {a b} : pluss a b = pluss b a := by
+  repeat rw [pluss]
+  rw [Nat.add_comm a b]`;
+
+const nativeSol = `import Mathlib
+
+def pluss (a b : ℕ) : ℕ := a + b + (1 + 999 + 2)
+
+theorem pluss_comm {a b} : pluss a b = pluss b a := by
+  have h : 1 + 999 + 2 = 1002 := by native_decide
+  repeat rw [pluss]
+  repeat rw [h]
+  rw [Nat.add_comm a b]`;
 
 export const fakedata: { [key: string]: EditorState } = {
-  "simple-correct": { type: "simple", code: `theorem ex : True :=\n  True.intro` },
+  "simple-correct": {
+    type: "simple",
+    code: basicSol,
+  },
   "simple-err": { type: "simple", code: `theorem ex : True :=\n  by refl` },
-  "simple-sorry": { type: "simple", code: `theorem ex : True :=\n  by sorry` },
-  "simple-native": { type: "simple", code: `theorem ex : True :=\n  by native_decide` },
+  "simple-sorry": {
+    type: "simple",
+    code: challenge,
+  },
+  "simple-native": {
+    type: "simple",
+    code: nativeSol,
+  },
   "simple-exploit": { type: "simple", code: exploit },
   "comp-correct": {
     type: "comparator",
-    challenge: `theorem ex : True :=\n  by sorry`,
-    solution: `theorem ex : True :=\n  True.intro`,
+    challenge: challenge,
+    solution: basicSol,
   },
   "comp-axioms": {
     type: "comparator",
-    challenge: `theorem ex : True :=\n  by sorry`,
-    solution: `theorem ex : True :=\n  by native_decide`,
+    challenge: challenge,
+    solution: nativeSol,
   },
   "comp-exploit": {
     type: "comparator",
-    challenge: `theorem ex : False :=\n  by sorry`,
+    challenge: challenge,
     solution: exploit,
   },
   "comp-mismatch": {
     type: "comparator",
-    challenge: `theorem ex : False :=\n  by sorry`,
-    solution: `theorem ex : True :=\n  True.intro`,
+    challenge: `import Mathlib
+
+def pluss (a b : ℕ) : ℕ := a + b + (2 + 999 + 1)
+
+theorem pluss_comm {a b} : pluss a b = pluss b a := by
+  sorry`,
+    solution: basicSol,
   },
   "comp-sorry": {
     type: "comparator",
-    challenge: `theorem ex : False :=\n  by sorry`,
-    solution: `theorem ex : False :=\n  by sorry`,
+    challenge: challenge,
+    solution: challenge,
   },
 };

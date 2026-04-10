@@ -20,4 +20,6 @@ export type VerificationResponse =
   | { type: "sorry"; where: string }
   | { type: "empty" }
   | { type: "partial"; axioms: string[]; signature: string[] }
+  | { type: "challenge_fail_missing"; const: string; what: string; where: string }
+  | { type: "challenge_fail_mismatch"; const: string; what: string; }
   | { type: "full"; signature: string[] };
