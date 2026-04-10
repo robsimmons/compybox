@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { EditorState } from "./types";
 import { z } from "zod";
-import { Button, Code, Em, Link, Stack, Strong, Text } from "@chakra-ui/react";
+import { Button, Code, Link, Stack, Strong, Text } from "@chakra-ui/react";
 import PreScroll from "./PreScroll";
 
 interface VerifyTabProps {
@@ -149,9 +149,7 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
           <Stack style={boxStyle}>
             <Text>
               The Lean kernel has verified that the contents of the Candidate Solution represent a
-              valid solution to the problem posed in the challenge file (SHA256 hash{" "}
-              <Code style={{ fontFamily: "monospace" }}>{state.hash}</Code>, friendly name{" "}
-              <Em>{state.friendlyHash}</Em>).
+              valid solution to the problem posed in the challenge file.
             </Text>
           </Stack>
         );

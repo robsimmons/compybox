@@ -14,6 +14,7 @@ export default defineConfig([
     "**/coverage", // istanbul coverage reports
     "**/playwright-report/", // playwright test reports
     "eslint.config.mjs", // eslint-plugin-import has trouble with this config file
+    "Projects/**",
   ]),
   {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],

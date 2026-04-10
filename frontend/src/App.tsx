@@ -3,8 +3,6 @@ import { type EditorState } from "./types.ts";
 import SimpleEditor from "./SimpleEditor.tsx";
 import ComparatorEditor from "./ComparatorEditor.tsx";
 import {
-  Box,
-  Checkbox,
   createListCollection,
   Em,
   Link,
@@ -67,6 +65,7 @@ export default function App() {
   }
 
   const [currTab, setCurrTab] = useState<null | string>(null);
+  const [aPerc, setAPerc] = useState(50);
   const [bPerc, setBPerc] = useState(50);
   const splitterPanelB = useRef<HTMLDivElement | null>(null);
   const splitterTabs = useRef<HTMLDivElement | null>(null);
@@ -142,6 +141,7 @@ export default function App() {
         <Splitter.Root
           panels={[{ id: "a" }, { id: "b" }]}
           onResize={(e) => {
+            setAPerc(e.size[0]);
             setBPerc(e.size[1]);
           }}
         >
@@ -150,10 +150,9 @@ export default function App() {
               <SimpleEditor code={state.code} />
             ) : (
               <ComparatorEditor
+                vw={aPerc - 1}
                 challenge={state.challenge}
                 solution={state.solution}
-                hash={state.hash}
-                friendlyHash={state.friendlyHash}
               />
             )}
           </Splitter.Panel>
@@ -234,8 +233,8 @@ export default function App() {
                 <ScrollArea.Root height={scrollHMenu}>
                   <ScrollArea.Viewport>
                     <ScrollArea.Content paddingBlock="var(--chakra-spacing-2)">
-                      <VerifyTab vw={bPerc} state={state} setStatus={setStatus} />
-                    </ScrollArea.Content>{" "}
+                      <VerifyTab vw={bPerc - 1} state={state} setStatus={setStatus} />
+                    </ScrollArea.Content>
                   </ScrollArea.Viewport>
                   <ScrollArea.Scrollbar orientation="vertical" />
                   <ScrollArea.Corner />
