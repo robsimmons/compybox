@@ -55,7 +55,9 @@ export function emitStatusNow(id: string) {
 }
 
 setInterval(() => {
-  [...Q].map(emitStatusNow);
+  [...Q].map((x) => {
+    emitStatusNow(x);
+  });
 }, 3000);
 
 /** Immediately start job if there's an available worker */

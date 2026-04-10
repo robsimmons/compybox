@@ -8,7 +8,7 @@ app.use(express.json());
 app.post("/compybox/api/register", (req, res) => {
   const body = zRegisterRequest.parse(req.body);
   const id = addWorkToQueue(body);
-  res.send("compybox/api/track/" + id);
+  res.send({ track: "compybox/api/track/" + id });
 });
 
 app.post("/compybox/api/sync", (req, res) => {
@@ -45,7 +45,7 @@ app.get("/compybox/api/track/:id", (req, res) => {
     res.write(`data: ${msg}\n\n`);
   };
 
-  let keepAlive: NodeJS.Timeout | undefined = setInterval(() => {
+  const keepAlive: NodeJS.Timeout | undefined = setInterval(() => {
     res.write(":\n");
   }, 5000);
 
@@ -53,28 +53,28 @@ app.get("/compybox/api/track/:id", (req, res) => {
     switch (payload[0]) {
       case "done":
         clearInterval(keepAlive);
-        keepAlive = undefined;
-        sendMsg("done " + JSON.stringify(payload[1]));
+        emitter.removeAllListeners(id);
+        sendMsg(JSON.stringify({ type: "done", data: payload[1] }));
         res.end();
         break;
       case "error":
         clearInterval(keepAlive);
-        keepAlive = undefined;
-        sendMsg("error " + JSON.stringify(payload[1]));
+        emitter.removeAllListeners(id);
+        sendMsg(JSON.stringify({ type: "error ", message: payload[1] }));
         res.end();
         break;
       case "running":
-        sendMsg("running " + id);
+        sendMsg(JSON.stringify({ type: "running" }));
         break;
       case "stats":
-        sendMsg("stats " + JSON.stringify({ waiting: payload[1], place: payload[2] }));
+        sendMsg(JSON.stringify({ type: "stats", waiting: payload[1], place: payload[2] }));
         break;
     }
   };
 
   res.on("close", () => {
     clearInterval(keepAlive);
-    emitter.off(id, handleUpdate);
+    emitter.removeAllListeners(id);
   });
   emitter.on(id, handleUpdate);
   emitStatusNow(id);

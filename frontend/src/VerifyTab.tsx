@@ -29,10 +29,19 @@ const zJobStatus = z.union([
   z.object({ type: z.literal("full"), signature: z.array(z.string()) }),
 ]);
 
+const zLiveStatus = z.union([
+  z.object({ type: z.literal("done"), data: zJobStatus }),
+  z.object({ type: z.literal("error"), data: z.any() }),
+  z.object({ type: z.literal("running") }),
+  z.object({ type: z.literal("stats"), waiting: z.int(), place: z.int() }),
+]);
+
+const zRegisterResponse = z.object({ track: z.string() });
+
 const boxStyle = { paddingInline: "var(--chakra-spacing-3)" };
 
 export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: VerifyTabProps) {
-  const [jobStatus, setJobStatus] = useState<null | false | z.infer<typeof zJobStatus>>(null);
+  const [jobStatus, setJobStatus] = useState<null | z.infer<typeof zLiveStatus>>(null);
   const [storedEditorState, setStoredEditorState] = useState(state);
 
   useEffect(() => {
@@ -46,8 +55,10 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
             challenge: storedEditorState.challenge,
             solution: storedEditorState.solution,
           };
+    let source: EventSource | null = null;
 
     setExternalStatus("waiting");
+    /*
     fetch("/compybox/api/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -83,8 +94,54 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
         setJobStatus(false);
         setExternalStatus("error");
       });
+    */
+
+    fetch("/compybox/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request),
+    })
+      .then((response) => response.json())
+      .then((json) => {
+        if (cancelled) return;
+        const data = zRegisterResponse.parse(json);
+        source = new EventSource(data.track);
+        source.onmessage = (event) => {
+          const message = zLiveStatus.parse(JSON.parse(event.data as string));
+          setJobStatus(message);
+          if (message.type === "done") {
+            switch (message.data.type) {
+              case "sorry":
+                setExternalStatus("error");
+                break;
+              case "empty":
+                setExternalStatus("warning");
+                break;
+              case "full":
+                setExternalStatus("checked");
+                break;
+              case "failure":
+                setExternalStatus("error");
+                break;
+              case "partial":
+                setExternalStatus("warning");
+                break;
+              default:
+                setExternalStatus("error");
+            }
+            source.close();
+          }
+        };
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setJobStatus({ type: "error", data: `${err}` });
+        setExternalStatus("error");
+      });
+
     return () => {
       cancelled = true;
+      if (source) source.close();
     };
   }, [storedEditorState, setExternalStatus]);
 
@@ -94,10 +151,27 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
   }
 
   if (jobStatus === null) return <Stack style={boxStyle}>Waiting for server to respond</Stack>;
-  if (jobStatus === false) {
-    return <Stack style={boxStyle}>Something went wrong!</Stack>;
+  if (jobStatus.type === "running") {
+    return <Stack style={boxStyle}>Verification server is running</Stack>;
   }
-  switch (jobStatus.type) {
+  if (jobStatus.type === "stats") {
+    return (
+      <Stack style={boxStyle}>
+        Enqueued for verification ({jobStatus.place === 0 ? "next" : `#${jobStatus.place + 1}`} in
+        line)
+      </Stack>
+    );
+  }
+  if (jobStatus.type === "error") {
+    return (
+      <Stack style={boxStyle}>
+        <Text>Something went wrong!</Text>
+        <PreScroll vw={vw} messages={[`${jobStatus.data}`]} />
+      </Stack>
+    );
+  }
+  const result = jobStatus.data;
+  switch (result.type) {
     case "failure":
       return (
         <Stack style={boxStyle}>
@@ -105,7 +179,7 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
             The current Lean file could not be verified, and should not be treated as a reliable
             proof of anything. The Nanoda kernel gave the following error messages:
           </Text>
-          <PreScroll vw={vw} messages={[jobStatus.text]} />
+          <PreScroll vw={vw} messages={[result.text]} />
         </Stack>
       );
     case "empty":
@@ -125,7 +199,7 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
             as a reliable proof of anything.
           </Text>
           <Text>
-            The reason the file cannot be verified is that <Code>{jobStatus.where}</Code> uses the{" "}
+            The reason the file cannot be verified is that <Code>{result.where}</Code> uses the{" "}
             <Code>sorryAx</Code> axiom, and this axiom can be used to prove anything.
           </Text>
           {state.type !== "comparator" && (
@@ -182,7 +256,7 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
               </Link>
               .
             </Text>
-            <PreScroll vw={vw} messages={jobStatus.signature} />
+            <PreScroll vw={vw} messages={result.signature} />
             <Text>
               (Note: proofs aren't shown in the output above; Nanoda replaces them with an
               underscore <Code>_</Code>.)
@@ -210,8 +284,9 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
       return (
         <Stack style={boxStyle}>
           <Text>
-            The Lean kernel and the Nanoda kernel <Strong>cannot</Strong> fully verify this
-            development, because it uses axioms aside from the{" "}
+            The Lean kernel and the Nanoda kernel <Strong>cannot</Strong>{" "}
+            {state.type === "simple" && "fully"} verify this development, because it uses axioms
+            aside from the{" "}
             <Link
               href="https://lean-lang.org/doc/reference/latest/Axioms/#standard-axioms"
               target="_blank"
@@ -221,9 +296,9 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
             .
           </Text>
           <Text>
-            Specifically, it uses {jobStatus.axioms.length > 1 ? "these axioms" : "this axiom"}:
+            Specifically, it uses {result.axioms.length > 1 ? "these axioms" : "this axiom"}:
           </Text>
-          <PreScroll vw={vw} messages={jobStatus.axioms} />
+          <PreScroll vw={vw} messages={result.axioms} />
           {state.type === "simple" ? (
             <>
               <Text>
@@ -231,7 +306,7 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
                 Lean's type theory, then you can trust the Lean kernel's verification of the
                 following contents for the file:
               </Text>
-              <PreScroll vw={vw} messages={jobStatus.signature} />
+              <PreScroll vw={vw} messages={result.signature} />
             </>
           ) : (
             <Text>
@@ -257,8 +332,8 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
             Challenge.
           </Text>
           <Text>
-            The challenge failed because the {jobStatus.what} <Code>{jobStatus.const}</Code> does
-            not match between the Challenge and the Candidate Solution.
+            The challenge failed because the {result.what} <Code>{result.const}</Code> does not
+            match between the Challenge and the Candidate Solution.
           </Text>
         </Stack>
       );
@@ -271,8 +346,8 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
             Challenge.
           </Text>
           <Text>
-            The challenge failed because the {jobStatus.what} <Code>{jobStatus.const}</Code> is
-            missing in the {jobStatus.where}.
+            The challenge failed because the {result.what} <Code>{result.const}</Code> is missing in
+            the {result.where}.
           </Text>
         </Stack>
       );

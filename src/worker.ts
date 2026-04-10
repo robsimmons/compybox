@@ -3,7 +3,7 @@ import type { RegisterRequest, VerificationResponse } from "./types.ts";
 const STANDARD_CHALLENGE = `importMathlibdefpluss(ab:ℕ):ℕ:=a+b+(1+999+2)theorempluss_comm{ab}:plussab=plussba:=bysorry`;
 
 export async function doWork(data: RegisterRequest): Promise<VerificationResponse> {
-  await new Promise((resolve) => setTimeout(resolve, Math.random() * 2000 + 2000));
+  await new Promise((resolve) => setTimeout(resolve, Math.random() * 3000 + 2000));
   if (data.type === "simple") {
     const code = data.code
       .split("\n")
