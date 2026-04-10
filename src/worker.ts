@@ -65,7 +65,7 @@ export async function doWork(data: RegisterRequest): Promise<VerificationRespons
           `def pluss (a._@._internal._hyg.0 n : Nat) : Nat :=
   HAdd.hAdd (HAdd.hAdd a._@._internal._hyg.0 n)
     (HAdd.hAdd (HAdd.hAdd (OfNat.ofNat 1) (OfNat.ofNat 999)) (OfNat.ofNat 2))`,
-          `def pluss_comm : True := _`,
+          `theorem pluss_comm : True := _`,
         ],
       };
     }
