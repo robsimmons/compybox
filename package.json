@@ -18,11 +18,11 @@
     "test": "npm-run-all test:*",
     "test:frontend": "playwright test",
     "test:server": "vitest run --coverage",
-    "dev": "concurrently -n frontend,server -c blue,green \"npm run dev:frontend\" \"npm run dev:server\"",
+    "dev": "NODE_ENV=development concurrently -n frontend,server -c blue,green \"npm run dev:frontend\" \"npm run dev:server\"",
     "dev:frontend": "vite frontend",
     "dev:server": "node --watch ./src/server.ts",
     "build": "touch foo.txt && tsc && tsc -p frontend/tsconfig.json --noEmit && vite build frontend && ls -la",
-    "start": "MODE=production node ./src/server.ts",
+    "start": "NODE_ENV=production node ./src/server.ts",
     "playwright": "playwright test --ui"
   },
   "author": "Rob Simmons",

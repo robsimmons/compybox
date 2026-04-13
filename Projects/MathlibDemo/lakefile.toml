@@ -1,0 +1,34 @@
+name = "mathlib-demo"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["TheLeanFile"]
+
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.29.0"
+
+[[require]]
+name = "lean4export"
+scope = "leanprover"
+rev = "v4.29.0"
+
+[[lean_lib]]
+name = "TheLeanFile"
+
+[[lean_lib]]
+name = "Challenge"
+
+[[lean_lib]]
+name = "Solution"
+
+[[lean_exe]]
+name = "read-all-consts"
+root = "ReadAllConsts"
+

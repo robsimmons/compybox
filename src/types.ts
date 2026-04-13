@@ -16,10 +16,10 @@ export const zRegisterRequest = z.union([
 export type RegisterRequest = z.infer<typeof zRegisterRequest>;
 
 export type VerificationResponse =
-  | { type: "failure"; text: string }
-  | { type: "sorry"; where: string }
+  | { type: "failure"; component: string; text: string }
+  | { type: "sorry"; where: string[] }
   | { type: "empty" }
   | { type: "partial"; axioms: string[]; signature: string[] }
   | { type: "challenge_fail_missing"; const: string; what: string; where: string }
-  | { type: "challenge_fail_mismatch"; const: string; what: string; }
+  | { type: "challenge_fail_mismatch"; const: string; what: string }
   | { type: "full"; signature: string[] };

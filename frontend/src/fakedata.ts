@@ -53,11 +53,44 @@ export const fakedata: { [key: string]: EditorState } = {
     type: "simple",
     code: challenge,
   },
+  "simple-typo": {
+    type: "simple",
+    code: `import Mathlib
+
+def pluss (a b : ℕ) : ℕ := a + b + (1 + 999 + 2)
+
+  theorem pluss_comm {a b} : pluss a b = pluss b a := by
+  sorry
+
+d`,
+  },
   "simple-native": {
     type: "simple",
     code: nativeSol,
   },
   "simple-exploit": { type: "simple", code: exploit },
+  "simple-exploit-module": {
+    type: "simple",
+    code: `module
+public import Lean
+import Mathlib
+
+def pluss (a b : ℕ) : ℕ := a + b + (1 + 999 + 2)
+
+elab "theorem " id:ident ":" _ty:term ":=" _pf:term : command =>
+  Lean.Elab.Command.runTermElabM fun _ =>
+    Lean.addAndCompile <| .defnDecl {
+      name := id.getId
+      levelParams := []
+      type := Lean.mkConst \`\`True []
+      value := Lean.mkConst \`\`True.intro []
+      hints := .opaque
+      safety := .safe
+    }
+
+theorem pluss_comm : {a b : ℕ} → pluss a b = pluss b a := 
+  bogus ai generated nonsense\n`,
+  },
   "comp-correct": {
     type: "comparator",
     challenge: challenge,

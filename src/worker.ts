@@ -1,10 +1,74 @@
+import { createOlean, readAllConsts } from "./exec.ts";
 import type { RegisterRequest, VerificationResponse } from "./types.ts";
 
 const STANDARD_CHALLENGE = `importMathlibdefpluss(ab:ℕ):ℕ:=a+b+(1+999+2)theorempluss_comm{ab}:plussab=plussba:=bysorry`;
 
 export async function doWork(data: RegisterRequest): Promise<VerificationResponse> {
-  await new Promise((resolve) => setTimeout(resolve, Math.random() * 3000 + 2000));
   if (data.type === "simple") {
+    let stdout: string[] = [];
+    let stderr: string[] = [];
+    let combined: string[] = [];
+    let finished = false;
+    const pushData = (buffer: string[]) => (data: unknown) => {
+      const newOutput = data instanceof Buffer ? data.toString("utf-8") : `${data}`;
+      buffer.push(newOutput);
+      combined.push(newOutput);
+    };
+
+    // First task: lake build TheLeanFile
+    const { dir: projectId, process: processOlean } = await createOlean(
+      data.project,
+      "TheLeanFile",
+      data.code,
+    );
+    processOlean.stdout.on("data", pushData(stdout));
+    processOlean.stderr.on("data", pushData(stderr));
+    const taskOleanExit = await new Promise<number>((resolve, reject) => {
+      processOlean.on("error", (data) => {
+        finished = true;
+        reject(new Error(`compilation to olean failed\n\n${combined.join("")}}`));
+      });
+      processOlean.on("close", (data) => {
+        if (finished) return;
+        resolve(processOlean.exitCode);
+      });
+    });
+    if (taskOleanExit) {
+      return {
+        type: "failure",
+        component: "Lean's attempt to create an olean file from the input",
+        text: combined.join(),
+      };
+    }
+
+    // Second task: lake exe read-all-consts TheLeanFile
+    finished = false;
+    stdout = [];
+    stderr = [];
+    combined = [];
+    const processReadAllConsts = readAllConsts(data.project, "TheLeanFile", projectId);
+    processReadAllConsts.stderr.on("data", pushData(stdout));
+    processReadAllConsts.stderr.on("data", pushData(stderr));
+    const readAllConstsExit = await new Promise((resolve, reject) => {
+      processReadAllConsts.on("error", (data) => {
+        finished = true;
+        reject(new Error(`reading out constants failed\n\n${combined.join("")}`));
+      });
+      processReadAllConsts.on("close", (data) => {
+        if (finished) return;
+        resolve(processReadAllConsts.exitCode);
+      });
+    });
+    if (readAllConstsExit) {
+      return {
+        type: "failure",
+        component: "Reading the constants out from the generated olean",
+        text: combined.join(),
+      };
+    }
+    const readAllConstsOutput = JSON.stringify(stdout.join(""));
+    console.log({ readAllConstsOutput, stdout, stderr });
+
     const code = data.code
       .split("\n")
       .join("")

@@ -27,9 +27,11 @@ import VerifyTab from "./VerifyTab.tsx";
 const options = createListCollection({
   items: [
     { label: "Valid Proof", value: "simple-correct" },
+    { label: "Typo", value: "simple-typo" },
     { label: "Using Sorry", value: "simple-sorry" },
     { label: "Weird Axioms", value: "simple-native" },
     { label: "Metaprogramming Exploit", value: "simple-exploit" },
+    { label: "Metaprogramming Exploit (module)", value: "simple-exploit-module" },
     { label: "Challenge Success", value: "comp-correct" },
     { label: "Challenge With Weird Axioms", value: "comp-axioms" },
     { label: "Challenge/Solution Mismatch", value: "comp-mismatch" },

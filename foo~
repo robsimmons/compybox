@@ -1,0 +1,2 @@
+theorem ex : True :=
+  by sorry

@@ -17,6 +17,8 @@ app.post("/compybox/api/sync", (req, res) => {
   const handleUpdate = (...payload: EventPayload) => {
     if (payload[0] === "done") {
       res.send(payload[1]);
+    } else if (payload[0] === "failed") {
+      res.send({ type: "done", data: { type: "failure", text: payload[1].toString() } });
     }
   };
 
@@ -57,10 +59,10 @@ app.get("/compybox/api/track/:id", (req, res) => {
         sendMsg(JSON.stringify({ type: "done", data: payload[1] }));
         res.end();
         break;
-      case "error":
+      case "failed":
         clearInterval(keepAlive);
         emitter.removeAllListeners(id);
-        sendMsg(JSON.stringify({ type: "error ", message: payload[1] }));
+        sendMsg(JSON.stringify({ type: "error", data: payload[1].toString() }));
         res.end();
         break;
       case "running":

@@ -11,7 +11,7 @@ interface VerifyTabProps {
 }
 
 const zJobStatus = z.union([
-  z.object({ type: z.literal("failure"), text: z.string() }),
+  z.object({ type: z.literal("failure"), component: z.string(), text: z.string() }),
   z.object({ type: z.literal("sorry"), where: z.string() }),
   z.object({ type: z.literal("empty") }),
   z.object({
@@ -109,7 +109,10 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
         source.onmessage = (event) => {
           const message = zLiveStatus.parse(JSON.parse(event.data as string));
           setJobStatus(message);
-          if (message.type === "done") {
+          if (message.type === "error") {
+            setExternalStatus("error");
+            source!.close();
+          } else if (message.type === "done") {
             switch (message.data.type) {
               case "sorry":
                 setExternalStatus("error");
@@ -177,8 +180,9 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
         <Stack style={boxStyle}>
           <Text>
             The current Lean file could not be verified, and should not be treated as a reliable
-            proof of anything. The Nanoda kernel gave the following error messages:
+            proof of anything.{" "}
           </Text>
+          <Text>{result.component} resulted in the following error messages:</Text>
           <PreScroll vw={vw} messages={[result.text]} />
         </Stack>
       );
@@ -293,7 +297,7 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
             >
               standard three
             </Link>
-            .s
+            .
           </Text>
           <Text>
             Specifically, it uses {result.axioms.length > 1 ? "these axioms" : "this axiom"}:

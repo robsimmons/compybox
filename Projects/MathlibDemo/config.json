@@ -1,0 +1,13 @@
+{
+  "use_stdin": true,
+  "nat_extension": true,
+  "string_extension": true,
+  "unpermitted_axiom_hard_error": false,
+  "num_threads": 4,
+  "pp_declars": ["pluss", "pluss_comm", "pluss_comm._native.native_decide.ax_1_1"],
+  "pp_to_stdout": true,
+  "permitted_axioms": ["propext", "pluss_comm._native.native_decide.ax_1_1"],
+  "pp_options": {
+    "width": 70
+  }
+}

@@ -1,0 +1,14 @@
+#NO 
+cd ../../lean4export
+lake build lean4export
+cd ../Projects/mathlib
+lake build
+
+#TAKE 2
+lake build Demo
+lake exe lean4export TheLeanFile -- pluss pluss_comm > output.ndjson
+../../../nanoda_lib/target/release/nanoda_bin config.json < output.ndjson 
+
+#TAKE 3
+lake build TheLeanFile
+lake exe read-all-consts TheLeanFile

@@ -19,7 +19,7 @@ const CONCURRENCY = 1;
 export type EventPayload =
   | [tag: "running"]
   | [tag: "done", result: VerificationResponse]
-  | [tag: "error", error: Error]
+  | [tag: "failed", error: Error]
   | [tag: "stats", waiting: number, place: number];
 export const emitter = new EventEmitter<{ [id: string]: EventPayload }>();
 
@@ -83,6 +83,7 @@ function drain() {
       })
       .catch((error: Error) => {
         // Retry logic would go here
+        console.log("Errors???");
         job.status = { tag: "failed", error };
         emitStatusNow(id);
       })
