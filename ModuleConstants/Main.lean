@@ -1,5 +1,4 @@
 import Lean
-import Export
 
 open Lean
 
@@ -8,16 +7,19 @@ def standardAxioms := #[``propext, ``Quot.sound, ``Classical.choice]
 inductive VerificationResponse where
   | failure : String → VerificationResponse
   | empty : VerificationResponse
-  | sorry : Array Name → VerificationResponse
-  | contents : Array Name → Array Name → VerificationResponse
+  | contents : Array Name → Array Name → Array Name → VerificationResponse
 deriving Inhabited
 
 instance : ToJson VerificationResponse where
   toJson
-  | .failure str => Json.mkObj [ ("type", .str "failure"), ("stage", .str "initial processing"), ("text", .str str) ]
+  | .failure str => Json.mkObj [ ("type", .str "failure"), ("text", .str str) ]
   | .empty => Json.mkObj [ ("type", .str "empty") ]
-  | .sorry consts => Json.mkObj [ ("type", .str "sorry"), ("where", .arr (consts.map (.str ·.toString))) ]
-  | .contents axioms consts => Json.mkObj [ ("type", .str "partial"), ("axioms", .arr (axioms.map (.str ·.toString))), ("constants", .arr (consts.map (.str ·.toString))) ]
+  | .contents axioms consts sorryThms => Json.mkObj [
+      ("type", .str "success"),
+      ("axioms", .arr (axioms.map (.str ·.toString))),
+      ("constants", .arr (consts.map (.str ·.toString))),
+      ("sorryThms", .arr (sorryThms.map (.str ·.toString)))
+    ]
 
 /--
 Given a module defined in an environment, analyze the module to determine its
@@ -32,7 +34,16 @@ def readModule (env : Environment) (modName : Name) : StateM CollectAxioms.State
   let moduleData := env.header.moduleData[moduleIdx]!
   let constants := moduleData.constants
     |>.filterMap (fun const =>
-      -- always include non-internal constants AND constants that are non-internal but private
+      -- always *omit* axioms (leave these out unless we use them)
+      if let .axiomInfo _ := const then
+        .none
+      -- TEMPORARY WORKAROUND FOR
+      -- https://github.com/ammkrn/nanoda_lib/issues/17
+      else if const.name.toString.contains "«" then
+        .none
+      else
+      -- for everything that's not an axiom, include all non-internal
+      -- constants AND constants that are non-internal but private
       let constNameWithPrivateRemoved := const.name.components.filter (· != `_private)
       if not (constNameWithPrivateRemoved.any (·.isInternal)) then
         .some const
@@ -55,27 +66,27 @@ def readModule (env : Environment) (modName : Name) : StateM CollectAxioms.State
   let axiomsUsed := (← get).axioms
 
   -- Check for `sorry` condition: are there any theorems dependent on `sorryAx`
-  if axiomsUsed.contains ``sorryAx then
-    let sorryTheorems ← constants.filterM (fun const => do
-      match const with
-      | .thmInfo _ =>
-        let (_, axState) := ((CollectAxioms.collect const.name).run env).run {}
-        return axState.axioms.contains ``sorryAx
-      | _ => return false)
-    if sorryTheorems.size > 0 then
-      return .sorry (sorryTheorems.map (·.name))
+  let sorryThms ←
+    if axiomsUsed.contains ``sorryAx then
+      constants.filterM (fun const => do
+        match const with
+        | .thmInfo _ =>
+          let (_, axState) := ((CollectAxioms.collect const.name).run env).run {}
+          return axState.axioms.contains ``sorryAx
+        | _ => return false)
+    else pure #[]
 
   -- Return the (non-standard) axioms and constants
   let nonStandardAxioms := axiomsUsed.filter (not <| standardAxioms.contains ·)
-  return .contents nonStandardAxioms (constants.map (·.name))
+  return .contents nonStandardAxioms (constants.map (·.name)) (sorryThms.map (·.name))
 
 def main (args : List String) : IO Unit := do
   try
     initSearchPath (← findSysroot)
     let .some modStr := args[0]?
       | throw <| IO.userError "Insufficient command-line arguments given"
-    let modName := Name.mkStr1 modStr
-    let envWithImport ← importModules #[Import.mk `Init true false false, Import.mk modName true false false] {}
+    let modName := Syntax.decodeNameLit ("`" ++ modStr) |>.get!
+    let envWithImport ← importModules #[{ module := `Init }, { module := modName }] {}
     let (result, _) := (readModule envWithImport modName).run {}
     println! s!"{ToJson.toJson result |>.compress}"
   catch e =>

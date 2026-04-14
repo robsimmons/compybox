@@ -12,7 +12,7 @@ interface VerifyTabProps {
 
 const zJobStatus = z.union([
   z.object({ type: z.literal("failure"), component: z.string(), text: z.string() }),
-  z.object({ type: z.literal("sorry"), where: z.string() }),
+  z.object({ type: z.literal("sorry"), where: z.array(z.string()) }),
   z.object({ type: z.literal("empty") }),
   z.object({
     type: z.literal("challenge_fail_missing"),
@@ -107,13 +107,19 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
         const data = zRegisterResponse.parse(json);
         source = new EventSource(data.track);
         source.onmessage = (event) => {
-          const message = zLiveStatus.parse(JSON.parse(event.data as string));
-          setJobStatus(message);
-          if (message.type === "error") {
+          const message = zLiveStatus.safeParse(JSON.parse(event.data as string));
+          if (message.error) {
+            source!.close();
+            setExternalStatus("error");
+            setJobStatus({ type: "error", data: `Unexpected response\n\n${event.data}` });
+            return;
+          }
+          setJobStatus(message.data);
+          if (message.data.type === "error") {
             setExternalStatus("error");
             source!.close();
-          } else if (message.type === "done") {
-            switch (message.data.type) {
+          } else if (message.data.type === "done") {
+            switch (message.data.data.type) {
               case "sorry":
                 setExternalStatus("error");
                 break;
@@ -311,6 +317,10 @@ export default function VerifyTab({ vw, state, setStatus: setExternalStatus }: V
                 following contents for the file:
               </Text>
               <PreScroll vw={vw} messages={result.signature} />
+              <Text>
+                (Note: proofs aren't shown in the output above; Nanoda replaces them with an
+                underscore <Code>_</Code>.)
+              </Text>
             </>
           ) : (
             <Text>

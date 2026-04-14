@@ -28,7 +28,6 @@ export function isJob(id: string) {
 }
 
 export function emitStatusNow(id: string) {
-  console.log("Emitting status now for " + id);
   const job = jobDb.get(id);
   if (!job) {
     console.log("ERROR: no job for " + id);
@@ -83,7 +82,7 @@ function drain() {
       })
       .catch((error: Error) => {
         // Retry logic would go here
-        console.log("Errors???");
+        console.log("Errors???", error);
         job.status = { tag: "failed", error };
         emitStatusNow(id);
       })

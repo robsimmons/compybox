@@ -4,7 +4,7 @@ keywords = ["math"]
 defaultTargets = ["TheLeanFile"]
 
 [leanOptions]
-pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+pp.unicode.fun = true                 # pretty-prints `fun a ↦ b`
 relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
 maxSynthPendingDepth = 3
@@ -19,6 +19,12 @@ name = "lean4export"
 scope = "leanprover"
 rev = "v4.29.0"
 
+[[require]]
+name = "ModuleConstants"
+path = "../../ModuleConstants"
+scope = "leanprover"
+rev = "v4.29.0"
+
 [[lean_lib]]
 name = "TheLeanFile"
 
@@ -27,8 +33,3 @@ name = "Challenge"
 
 [[lean_lib]]
 name = "Solution"
-
-[[lean_exe]]
-name = "read-all-consts"
-root = "ReadAllConsts"
-
