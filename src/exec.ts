@@ -4,6 +4,7 @@ import { join, resolve } from "node:path";
 import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
+import { z } from "zod";
 
 const IS_DEV = process.env.NODE_ENV === "development";
 const PROJ_ROOT = resolve(process.env.PROJ_ROOT || "Projects");
@@ -11,6 +12,11 @@ export const OUTPUT_ROOT_DIR = await mkdtemp(join(tmpdir(), "verification-workfl
 const NANODA_DIR = process.env.NANODA_DIR || "/Users/rob/r/nanoda_lib/target/release";
 export const STANDARD_AXIOMS = ["propext", "Quot.sound", "Classical.choice"];
 
+/**
+ * Generates (and returns) a unique project directory `projectId` and a
+ * `process` that will, upon successful termination, place the `olean` files
+ * for `$projectId/olean`
+ */
 export async function createOlean(
   projectName: string,
   leanModuleName: string,
@@ -22,6 +28,7 @@ export async function createOlean(
   await mkdir(oleanDir, { recursive: true });
 
   if (IS_DEV) {
+    console.log("DEVELOPMENT WARNING: running lake without bubblewrap!");
     await writeFile(join(projDir, leanModuleName + ".lean"), leanFileContents);
     await rm(join(projDir, ".lake", "build"), { recursive: true, force: true });
     await symlink(oleanDir, join(projDir, ".lake", "build"));
@@ -30,11 +37,44 @@ export async function createOlean(
       process: spawn("lake", ["build", leanModuleName], { cwd: projDir }),
     };
   } else {
-    throw new Error("unimplemented");
+    const workDir = join(OUTPUT_ROOT_DIR, projectId, "workdir");
+    await mkdir(workDir);
+    return {
+      projectId: projectId,
+      process: spawn(
+        join(import.meta.dirname, "exec", "creatOlean.sh"),
+        ["build", leanModuleName],
+        { cwd: projDir },
+      ),
+    };
   }
 }
 
-export function readAllConsts(projectName: string, leanModuleName: string, projectId: string) {
+/**
+ * Zod description of the JSON value printed out by a successful run of
+ * `readAllConsts`
+ */
+export const zModuleConstantResponse = z.union([
+  z.object({ type: z.literal("failure"), text: z.string() }),
+  z.object({ type: z.literal("empty") }),
+  z.object({
+    type: z.literal("success"),
+    axioms: z.array(z.string()),
+    constants: z.array(z.string()),
+    sorryThms: z.array(z.string()),
+  }),
+]);
+
+/**
+ * Reads the olean files from `$projectId/olean` and returns a process that,
+ * upon successful termination, prints to standard output a JSON object
+ * conforming to `zModuleConstantResponse`.
+ */
+export function readModuleConstants(
+  projectName: string,
+  leanModuleName: string,
+  projectId: string,
+) {
   const projDir = join(PROJ_ROOT, projectName);
 
   if (IS_DEV) {

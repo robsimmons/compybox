@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { createOlean, leanExport, nanoda, readAllConsts } from "./exec.ts";
+import {
+  createOlean,
+  leanExport,
+  nanoda,
+  readModuleConstants,
+  zModuleConstantResponse,
+} from "./exec.ts";
 import type { RegisterRequest, VerificationResponse } from "./types.ts";
 
 const STANDARD_CHALLENGE = `importMathlibdefpluss(ab:ℕ):ℕ:=a+b+(1+999+2)theorempluss_comm{ab}:plussab=plussba:=bysorry`;
@@ -10,17 +16,6 @@ const StandardAxiomNameSet = new Set([
   "Classical.choice",
   "Quot.sound.{u}",
   "Classical.choice.{u}",
-]);
-
-const zModuleConstantResponse = z.union([
-  z.object({ type: z.literal("failure"), text: z.string() }),
-  z.object({ type: z.literal("empty") }),
-  z.object({
-    type: z.literal("success"),
-    axioms: z.array(z.string()),
-    constants: z.array(z.string()),
-    sorryThms: z.array(z.string()),
-  }),
 ]);
 
 export async function doWork(data: RegisterRequest): Promise<VerificationResponse> {
@@ -68,7 +63,7 @@ export async function doWork(data: RegisterRequest): Promise<VerificationRespons
     stdout = [];
     stderr = [];
     combined = [];
-    const processReadAllConsts = readAllConsts(data.project, "TheLeanFile", projectId);
+    const processReadAllConsts = readModuleConstants(data.project, "TheLeanFile", projectId);
     processReadAllConsts.stdout.on("data", pushData(stdout));
     processReadAllConsts.stderr.on("data", pushData(stderr));
     const readAllConstsExit = await new Promise((resolve, reject) => {
