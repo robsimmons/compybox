@@ -21,7 +21,7 @@ rev = "v4.29.0"
 
 [[require]]
 name = "ModuleConstants"
-path = "../../ModuleConstants"
+path = "./ModuleConstants"
 scope = "leanprover"
 rev = "v4.29.0"
 

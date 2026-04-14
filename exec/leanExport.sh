@@ -5,11 +5,9 @@ ulimit -t 120
 # Resolve any symlinks in arguments
 INPUT_DIR="$(realpath "$1")"   # Where the template project lives
 shift
-OUTPUT_DIR="$(realpath "$1")"  # The directory where attempted writes to the template project's .lake/build directory will go
+OUTPUT_DIR="$(realpath "$1")"  # The directory where overlay writes went
 shift
-WORK_DIR="$(realpath "$1")"    # An empty directory on the same filesystem as OUTPUT_DIR
-shift
-MODULE_NAME="$(realpath "$1")" # The argument to `lake exe module-constants`
+MODULE_NAME="$1"               # The argument to `lake exe module-constants`
 shift
 
 # Lake needs to know about git and dirname to function
@@ -32,11 +30,12 @@ exec bwrap \
     --clearenv \
     --setenv PATH "$GIT_PATH:$DIRNAME_PATH" \
     \
-    --overlay-src "$INPUT_DIR" \
-    --overlay "$OUTPUT_DIR" "$WORK_DIR" /project \
+    --bind "$INPUT_DIR" "/project" \
+    --bind "$OUTPUT_DIR/.lake/build" "/project/.lake/build" \
+    --remount-ro "/project" \
     \
     --unshare-all  \
     --die-with-parent \
     --chdir /project \
     \
-    lake build $MODULE_NAME
+    /lean/bin/lake exe lean4export Init $MODULE_NAME -- propext Classical.choice Quot.sound $@

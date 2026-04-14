@@ -31,6 +31,7 @@ export async function createOlean(
     console.log("DEVELOPMENT WARNING: running lake without bubblewrap!");
     await writeFile(join(projDir, leanModuleName + ".lean"), leanFileContents);
     await rm(join(projDir, ".lake", "build"), { recursive: true, force: true });
+  await mkdir(join(oleanDir, ".lake", "build"), { recursive: true });
     await symlink(oleanDir, join(projDir, ".lake", "build"));
     return {
       projectId: projectId,
