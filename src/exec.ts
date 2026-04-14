@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { mkdir, mkdtemp, rm, rmdir, symlink, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
-import { fork, spawn } from "node:child_process";
-import { write } from "node:fs";
+import { spawn } from "node:child_process";
 
 const IS_DEV = process.env.NODE_ENV === "development";
 const PROJ_ROOT = resolve(process.env.PROJ_ROOT || "Projects");

@@ -134,7 +134,9 @@ theorem falsy : False := by
   have truly_marvelous_1 : ¬9223372036854775807 < badNat := by decide
   simp_all`,
   },
-  "simple-malformed-expr": {type: "simple", code: `-- Joachim's contribution #2
+  "simple-malformed-expr": {
+    type: "simple",
+    code: `-- Joachim's contribution #2
 import Lean
 
 open Lean
@@ -156,7 +158,8 @@ theorem boom1 : False := by
   -- decoding and encoding an invalid string is not roundtripping
   have : (foo = String.ofList foo.toList)    = false := by native_decide
   have : (foo = String.ofList foo.toList)    = true := by rw [String.ofList_toList]; simp
-  contradiction`},
+  contradiction`,
+  },
   "simple-native": {
     type: "simple",
     code: nativeSol,

@@ -4,7 +4,7 @@ import type { RegisterRequest, VerificationResponse } from "./types.ts";
 
 const STANDARD_CHALLENGE = `importMathlibdefpluss(ab:ℕ):ℕ:=a+b+(1+999+2)theorempluss_comm{ab}:plussab=plussba:=bysorry`;
 
-const STANDARD_AXIOMS = new Set([
+const StandardAxiomNameSet = new Set([
   "propext",
   "Quot.sound",
   "Classical.choice",
@@ -45,17 +45,17 @@ export async function doWork(data: RegisterRequest): Promise<VerificationRespons
     );
     processOlean.stdout.on("data", pushData(stdout));
     processOlean.stderr.on("data", pushData(stderr));
-    const taskOleanExit = await new Promise<number>((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       processOlean.on("error", (data) => {
         finished = true;
         reject(new Error(`compilation to olean failed\n\n${combined.join("")}}`));
       });
       processOlean.on("close", (data) => {
         if (finished) return;
-        resolve(processOlean.exitCode);
+        resolve(null);
       });
     });
-    if (taskOleanExit) {
+    if (processOlean.exitCode) {
       return {
         type: "failure",
         component: "Lean's attempt to create an olean file from the input",
@@ -147,7 +147,7 @@ export async function doWork(data: RegisterRequest): Promise<VerificationRespons
     // const processLeanExport = leanExport(data.project, "TheLeanFile");
     const components = stdout.join("").trim().split("\n\n");
     const allAxioms = components.filter(
-      (axiom) => axiom.startsWith("axiom") && !STANDARD_AXIOMS.has(axiom.split(" ")[1]),
+      (axiom) => axiom.startsWith("axiom") && !StandardAxiomNameSet.has(axiom.split(" ")[1]),
     );
     const allOtherComponents = components.filter((axiom) => !axiom.startsWith("axiom"));
     for (const axiom of allAxioms) {
@@ -214,7 +214,7 @@ export async function doWork(data: RegisterRequest): Promise<VerificationRespons
         `importMathlibdefpluss(ab:ℕ):ℕ:=a+b+(1+999+2)theorempluss_comm{ab}:plussab=plussba:=bysorry`,
       )
     ) {
-      return { type: "sorry", where: "pluss_comm" };
+      return { type: "sorry", where: ["pluss_comm"] };
     }
     if (
       solution.startsWith(
@@ -232,6 +232,6 @@ export async function doWork(data: RegisterRequest): Promise<VerificationRespons
         signature: ["theorem x : True := _"],
       };
     }
-    return { type: "failure", text: "blah blah blah" };
+    throw new Error("unimplemented");
   }
 }
