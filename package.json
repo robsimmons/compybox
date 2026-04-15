@@ -5,7 +5,8 @@
   "type": "module",
   "files": [
     "dist",
-    "frontend/dist"
+    "frontend/dist",
+    "exec"
   ],
   "scripts": {
     "check": "npm-run-all check:*",
