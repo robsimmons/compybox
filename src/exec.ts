@@ -43,6 +43,7 @@ export async function createOlean(
       process: spawn("lake", ["build", leanModuleName], { cwd: projDir }),
     };
   } else {
+    await writeFile(join(oleanDir, leanModuleName + ".lean"), leanFileContents);
     const workDir = join(OUTPUT_ROOT_DIR, projectId, "workdir");
     await mkdir(workDir);
     return {
