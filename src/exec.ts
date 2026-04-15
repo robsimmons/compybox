@@ -14,7 +14,7 @@ export const STANDARD_AXIOMS = ["propext", "Quot.sound", "Classical.choice"];
 
 function callScript(cwd: string, script: string, args: string[]) {
   console.log(`Calling script '${script}.sh' with args ${JSON.stringify(args)}`);
-  return spawn(join(import.meta.dirname, "exec", script + ".sh"), args, { cwd });
+  return spawn(join(import.meta.dirname, "..", "..", "exec", script + ".sh"), args, { cwd });
 }
 
 /**
