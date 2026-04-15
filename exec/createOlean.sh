@@ -3,8 +3,6 @@
 ulimit -t 120
 
 # Resolve any symlinks in arguments
-INPUT_DIR="$(realpath "$1")"   # Where the template project lives
-shift
 OUTPUT_DIR="$(realpath "$1")"  # The directory where overlay writes will go
 shift
 WORK_DIR="$(realpath "$1")"    # An empty directory on the same filesystem as OUTPUT_DIR
@@ -19,7 +17,7 @@ DIRNAME_PATH=$(dirname $(realpath $(which dirname)))
 # The LEAN_ROOT will be a path in `/home/$USER/.elan`, and we don't
 # want the container to know anything about the `/home`, so
 # we'll bind this directory to `/lean`
-LEAN_ROOT="$(cd $INPUT_DIR && lean --print-prefix)"
+LEAN_ROOT="$(lean --print-prefix)"
 
 exec bwrap \
     --ro-bind /nix /nix \
@@ -33,7 +31,7 @@ exec bwrap \
     --clearenv \
     --setenv PATH "$PATH:$GIT_PATH:$DIRNAME_PATH" \
     \
-    --overlay-src "$INPUT_DIR" \
+    --overlay-src "$PWD" \
     --overlay "$OUTPUT_DIR" "$WORK_DIR" /project \
     \
     --unshare-all  \

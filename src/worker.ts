@@ -42,6 +42,7 @@ export async function doWork(data: RegisterRequest): Promise<VerificationRespons
     processOlean.stderr.on("data", pushData(stderr));
     await new Promise((resolve, reject) => {
       processOlean.on("error", (data) => {
+        console.error("failure: " + `${data}`);
         finished = true;
         reject(new Error(`compilation to olean failed\n\n${combined.join("")}}`));
       });
