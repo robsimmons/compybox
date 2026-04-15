@@ -12,6 +12,11 @@ export const OUTPUT_ROOT_DIR = await mkdtemp(join(tmpdir(), "verification-workfl
 const NANODA_DIR = process.env.NANODA_DIR || "/Users/rob/r/nanoda_lib/target/release";
 export const STANDARD_AXIOMS = ["propext", "Quot.sound", "Classical.choice"];
 
+function callScript(script: string, args: string[]) {
+  console.log(`Calling script '${script}.sh' with args ${JSON.stringify(args)}`);
+  return spawn(join(import.meta.dirname, "exec", script + ".sh"), args);
+}
+
 /**
  * Generates (and returns) a unique project directory `projectId` and a
  * `process` that will, upon successful termination, place the `olean` files
@@ -31,7 +36,7 @@ export async function createOlean(
     console.log("DEVELOPMENT WARNING: running lake without bubblewrap!");
     await writeFile(join(projDir, leanModuleName + ".lean"), leanFileContents);
     await rm(join(projDir, ".lake", "build"), { recursive: true, force: true });
-  await mkdir(join(oleanDir, ".lake", "build"), { recursive: true });
+    await mkdir(join(oleanDir, ".lake", "build"), { recursive: true });
     await symlink(oleanDir, join(projDir, ".lake", "build"));
     return {
       projectId: projectId,
@@ -42,11 +47,7 @@ export async function createOlean(
     await mkdir(workDir);
     return {
       projectId: projectId,
-      process: spawn(
-        join(import.meta.dirname, "exec", "creatOlean.sh"),
-        ["build", leanModuleName],
-        { cwd: projDir },
-      ),
+      process: callScript("createOlean", [projDir, oleanDir, workDir, leanModuleName]),
     };
   }
 }
@@ -77,13 +78,14 @@ export function readModuleConstants(
   projectId: string,
 ) {
   const projDir = join(PROJ_ROOT, projectName);
+  const oleanDir = join(OUTPUT_ROOT_DIR, projectId, "olean");
 
   if (IS_DEV) {
     // Dev only works with CONCURRENCY=1, so assume the correct olean files
     // are already in place as a result of calling `createOlean()`
     return spawn("lake", ["exe", "module-constants", leanModuleName], { cwd: projDir });
   } else {
-    throw new Error("unimplemented");
+    return callScript("readModuleConstants", [projDir, oleanDir, leanModuleName]);
   }
 }
 
@@ -92,9 +94,9 @@ export function leanExport(
   leanModuleName: string,
   projectId: string,
   constants: string[],
-  axioms: string[],
 ) {
   const projDir = join(PROJ_ROOT, projectName);
+  const oleanDir = join(OUTPUT_ROOT_DIR, projectId, "olean");
 
   if (IS_DEV) {
     return spawn(
@@ -103,7 +105,13 @@ export function leanExport(
       { cwd: projDir },
     );
   } else {
-    throw new Error("unimplemented");
+    return callScript("leanExport", [
+      projDir,
+      oleanDir,
+      leanModuleName,
+      ...STANDARD_AXIOMS,
+      ...constants,
+    ]);
   }
 }
 
@@ -133,5 +141,6 @@ export async function nanoda(
     ),
   );
 
+  // We're trusting `nanoda_bin` with non-sandboxed execution
   return spawn("nanoda_bin", [nanodaConfig], { env: { ...process.env, PATH: NANODA_DIR } });
 }

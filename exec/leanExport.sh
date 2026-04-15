@@ -38,4 +38,4 @@ exec bwrap \
     --die-with-parent \
     --chdir /project \
     \
-    /lean/bin/lake exe lean4export Init $MODULE_NAME -- propext Classical.choice Quot.sound $@
+    /lean/bin/lake exe lean4export Init $MODULE_NAME -- $@

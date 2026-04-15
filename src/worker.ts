@@ -108,7 +108,6 @@ export async function doWork(data: RegisterRequest): Promise<VerificationRespons
       "TheLeanFile",
       projectId,
       moduleConstants.constants,
-      moduleConstants.axioms,
     );
     const processNanoda = await nanoda(
       data.project,
