@@ -48,7 +48,7 @@ export async function createOlean(
     await mkdir(workDir);
     return {
       projectId: projectId,
-      process: callScript(projDir, "createOlean", [projDir, oleanDir, workDir, leanModuleName]),
+      process: callScript(projDir, "createOlean", [oleanDir, workDir, leanModuleName]),
     };
   }
 }
@@ -86,7 +86,7 @@ export function readModuleConstants(
     // are already in place as a result of calling `createOlean()`
     return spawn("lake", ["exe", "module-constants", leanModuleName], { cwd: projDir });
   } else {
-    return callScript(projDir, "readModuleConstants", [projDir, oleanDir, leanModuleName]);
+    return callScript(projDir, "readModuleConstants", [oleanDir, leanModuleName]);
   }
 }
 
@@ -107,7 +107,6 @@ export function leanExport(
     );
   } else {
     return callScript(projDir, "leanExport", [
-      projDir,
       oleanDir,
       leanModuleName,
       ...STANDARD_AXIOMS,
