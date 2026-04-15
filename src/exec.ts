@@ -12,9 +12,9 @@ export const OUTPUT_ROOT_DIR = await mkdtemp(join(tmpdir(), "verification-workfl
 const NANODA_DIR = process.env.NANODA_DIR || "/Users/rob/r/nanoda_lib/target/release";
 export const STANDARD_AXIOMS = ["propext", "Quot.sound", "Classical.choice"];
 
-function callScript(script: string, args: string[]) {
+function callScript(cwd: string, script: string, args: string[]) {
   console.log(`Calling script '${script}.sh' with args ${JSON.stringify(args)}`);
-  return spawn(join(import.meta.dirname, "exec", script + ".sh"), args);
+  return spawn(join(import.meta.dirname, "exec", script + ".sh"), args, { cwd });
 }
 
 /**
@@ -48,7 +48,7 @@ export async function createOlean(
     await mkdir(workDir);
     return {
       projectId: projectId,
-      process: callScript("createOlean", [projDir, oleanDir, workDir, leanModuleName]),
+      process: callScript(projDir, "createOlean", [projDir, oleanDir, workDir, leanModuleName]),
     };
   }
 }
@@ -86,7 +86,7 @@ export function readModuleConstants(
     // are already in place as a result of calling `createOlean()`
     return spawn("lake", ["exe", "module-constants", leanModuleName], { cwd: projDir });
   } else {
-    return callScript("readModuleConstants", [projDir, oleanDir, leanModuleName]);
+    return callScript(projDir, "readModuleConstants", [projDir, oleanDir, leanModuleName]);
   }
 }
 
@@ -106,7 +106,7 @@ export function leanExport(
       { cwd: projDir },
     );
   } else {
-    return callScript("leanExport", [
+    return callScript(projDir, "leanExport", [
       projDir,
       oleanDir,
       leanModuleName,
