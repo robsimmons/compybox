@@ -23,7 +23,7 @@ LEAN_ROOT="$(lean --print-prefix)"
 exec bwrap \
     --ro-bind /nix /nix \
     --ro-bind "$LEAN_ROOT" /lean \
-    --ro-bind "$(dirname LEAN4EXPORT_DIR)" /lean4export \
+    --ro-bind "$LEAN4EXPORT_DIR" /lean4export \
     \
     --dev /dev	\
     --tmpfs /tmp \
