@@ -10,8 +10,8 @@ const IS_DEV = process.env.NODE_ENV === "development";
 const PROJ_ROOT = resolve(process.env.PROJ_ROOT || "Projects");
 export const OUTPUT_ROOT_DIR = await mkdtemp(join(tmpdir(), "verification-workflow-"));
 const NANODA_DIR = process.env.NANODA_DIR || "/Users/rob/r/nanoda_lib/target/release";
-const LEAN4EXPORT_BIN =
-  process.env.LEAN4EXPORT_BIN || "/Users/rob/r/lean4export/.lake/build/bin/lean4export";
+const LEAN4EXPORT_BIN_DIR =
+  process.env.LEAN4EXPORT_BIN_DIR || "/Users/rob/r/lean4export/.lake/build/bin";
 export const STANDARD_AXIOMS = ["propext", "Quot.sound", "Classical.choice"];
 
 function callScript(cwd: string, script: string, args: string[]) {
@@ -110,7 +110,7 @@ export function leanExport(
     );
   } else {
     return callScript(projDir, "leanExport", [
-      LEAN4EXPORT_BIN,
+      LEAN4EXPORT_BIN_DIR,
       oleanDir,
       leanModuleName,
       ...STANDARD_AXIOMS,

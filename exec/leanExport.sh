@@ -4,7 +4,7 @@ ulimit -t 120
 
 
 # Resolve any symlinks in arguments
-LEAN4EXPORT_BIN="$(realpath "$1")" 
+LEAN4EXPORT_DIR="$(realpath "$1")" 
 shift
 OUTPUT_DIR="$(realpath "$1")"  # The directory where overlay writes went
 shift
@@ -23,6 +23,7 @@ LEAN_ROOT="$(lean --print-prefix)"
 exec bwrap \
     --ro-bind /nix /nix \
     --ro-bind "$LEAN_ROOT" /lean \
+    --ro-bind "$(dirname LEAN4EXPORT_DIR)" /lean4export
     \
     --dev /dev	\
     --tmpfs /tmp \
@@ -39,4 +40,4 @@ exec bwrap \
     --die-with-parent \
     --chdir /project \
     \
-    /lean/bin/lake env $LEAN4EXPORT_BIN Init $MODULE_NAME -- "$@"
+    /lean/bin/lake env /lean4export/lean4export Init $MODULE_NAME -- "$@"
