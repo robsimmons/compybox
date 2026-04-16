@@ -21,7 +21,6 @@ LEAN_ROOT="$(lean --print-prefix)"
 
 exec bwrap \
     --ro-bind /nix /nix \
-    --ro-bind /run /run \
     --ro-bind "$LEAN_ROOT" /lean \
     \
     --dev /dev	\

@@ -2,7 +2,10 @@
 
 ulimit -t 120
 
+
 # Resolve any symlinks in arguments
+LEAN4EXPORT_BIN="$(realpath "$1")" 
+shift
 OUTPUT_DIR="$(realpath "$1")"  # The directory where overlay writes went
 shift
 MODULE_NAME="$1"               # The argument to `lake exe module-constants`
@@ -36,4 +39,4 @@ exec bwrap \
     --die-with-parent \
     --chdir /project \
     \
-    /lean/bin/lake exe lean4export Init $MODULE_NAME -- $@
+    /lean/bin/lake env $LEAN4EXPORT_BIN Init $MODULE_NAME -- "$@"
